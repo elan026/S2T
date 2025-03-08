@@ -71,6 +71,7 @@ Create a Virtual Environment
 Speech-to-Text-WebApp/
 │── downloads/static/
 │   ├── styles.css  # CSS for styling
+|   |__ background.mp4
 │── templates/
 │   ├── index.html  # Frontend UI
 │── uploads/        # Stores downloaded transcripts
