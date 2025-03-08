@@ -2,7 +2,7 @@
 
 ## Overview
 This is a **Speech-to-Text Web Application** that supports real-time speech recognition in **9+ Indian languages**, including Hindi, Tamil, Telugu, Kannada, and more. It allows users to transcribe their speech, view the live text output, and download the transcript as a **.docx** file.
-
+![Demo](https://github.com/elan026/S2T/blob/main/Recording%202025-02-11%20215055.mp4)
 ## Features
 - **Supports Multiple Indian Languages** (English, Hindi, Tamil, Telugu, Kannada, etc.)
 - **Real-Time Speech Recognition** using Web Speech API
