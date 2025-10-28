@@ -7,7 +7,7 @@ This is a **Speech-to-Text Web Application** that supports real-time speech reco
 <img width="1920" height="1200" alt="Screenshot 2025-10-28 104126" src="https://github.com/user-attachments/assets/ecf8e17d-8445-4b6c-94c0-0503c487f396" />
 
 ## Live
-click -> ![S2T](https://spch-2-txt.streamlit.app/)
+click -> ![https://spch-2-txt.streamlit.app/]
 
 
 ## Features
