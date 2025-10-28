@@ -1,2 +1,5 @@
-flask-3.1.0
+flask==3.1.0
 python-docx==0.8.11
+streamlit
+streamlit-webrtc
+requests
