@@ -3,12 +3,353 @@
 <head>
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
-    <title>Speech-to-Text WebApp</title>
-    <link rel="stylesheet" href="static/styles.css">
-    <!-- Import Google Fonts -->
-     <link href="https://fonts.googleapis.com/css2?family=Pacifico&family=Poppins:wght@300;400;700&family=Lobster&display=swap" rel="stylesheet">
-    <!-- Add Material Icons -->
+    <title>S2T — Speech to Text</title>
+    <link href="https://fonts.googleapis.com/css2?family=DM+Sans:wght@400;500;600;700&family=Space+Grotesk:wght@500;600;700&display=swap" rel="stylesheet">
     <link href="https://fonts.googleapis.com/icon?family=Material+Icons" rel="stylesheet">
+    <style>
+        :root {
+            color-scheme: dark;
+            --bg: #07111f;
+            --surface: rgba(10, 25, 45, 0.78);
+            --surface-strong: rgba(15, 36, 63, 0.94);
+            --border: rgba(167, 211, 255, 0.18);
+            --text: #f5f9ff;
+            --muted: #a9bdd3;
+            --primary: #69b7ff;
+            --primary-strong: #2e8de6;
+            --danger: #ff7d8d;
+            --shadow: 0 24px 70px rgba(0, 0, 0, 0.35);
+        }
+
+        *,
+        *::before,
+        *::after {
+            box-sizing: border-box;
+        }
+
+        html {
+            min-width: 320px;
+            background: var(--bg);
+        }
+
+        body {
+            min-height: 100vh;
+            margin: 0;
+            overflow-x: hidden;
+            background:
+                radial-gradient(circle at 12% 12%, rgba(36, 132, 220, 0.26), transparent 32rem),
+                radial-gradient(circle at 88% 82%, rgba(104, 74, 230, 0.2), transparent 30rem),
+                var(--bg);
+            color: var(--text);
+            font-family: "DM Sans", sans-serif;
+            line-height: 1.5;
+        }
+
+        .background-video,
+        .gradient-overlay {
+            position: fixed;
+            inset: 0;
+            pointer-events: none;
+        }
+
+        .background-video {
+            z-index: -2;
+            width: 100%;
+            height: 100%;
+            object-fit: cover;
+            opacity: 0.18;
+            filter: saturate(0.8) contrast(1.05);
+        }
+
+        .gradient-overlay {
+            z-index: -1;
+            background: linear-gradient(135deg, rgba(7, 17, 31, 0.94), rgba(7, 17, 31, 0.68));
+        }
+
+        .app-container {
+            width: min(100% - 2rem, 860px);
+            margin: 0 auto;
+            padding: clamp(3rem, 8vw, 6rem) 0 2rem;
+        }
+
+        .hero {
+            margin-bottom: 2rem;
+            text-align: center;
+        }
+
+        .brand {
+            display: inline-flex;
+            align-items: center;
+            gap: 0.45rem;
+            margin-bottom: 1rem;
+            color: var(--primary);
+            font-size: 0.76rem;
+            font-weight: 700;
+            letter-spacing: 0.16em;
+            text-transform: uppercase;
+        }
+
+        .brand .material-icons {
+            font-size: 1.1rem;
+        }
+
+        h1 {
+            margin: 0;
+            color: var(--text);
+            font-family: "Space Grotesk", sans-serif;
+            font-size: clamp(2.35rem, 7vw, 4.4rem);
+            font-weight: 700;
+            letter-spacing: -0.055em;
+            line-height: 1;
+        }
+
+        .hero p {
+            max-width: 34rem;
+            margin: 1rem auto 0;
+            color: var(--muted);
+            font-size: 1rem;
+        }
+
+        .glass-card {
+            position: relative;
+            padding: clamp(1.25rem, 4vw, 2.25rem);
+            overflow: hidden;
+            border: 1px solid var(--border);
+            border-radius: 1.5rem;
+            background: linear-gradient(145deg, rgba(18, 43, 73, 0.84), var(--surface));
+            box-shadow: var(--shadow);
+            backdrop-filter: blur(18px);
+        }
+
+        .glass-card::before {
+            position: absolute;
+            top: 0;
+            left: 12%;
+            width: 76%;
+            height: 1px;
+            background: linear-gradient(90deg, transparent, rgba(166, 218, 255, 0.8), transparent);
+            content: "";
+        }
+
+        .language-selector {
+            margin-bottom: 1.5rem;
+        }
+
+        .language-selector label {
+            display: flex;
+            align-items: center;
+            gap: 0.55rem;
+            margin-bottom: 0.6rem;
+            color: var(--text);
+            font-size: 0.88rem;
+            font-weight: 600;
+        }
+
+        .language-selector label .material-icons {
+            color: var(--primary);
+            font-size: 1.15rem;
+        }
+
+        select,
+        textarea {
+            width: 100%;
+            border: 1px solid var(--border);
+            outline: none;
+            color: var(--text);
+            background-color: rgba(4, 15, 29, 0.72);
+            font: inherit;
+            transition: border-color 160ms ease, box-shadow 160ms ease, background-color 160ms ease;
+        }
+
+        select {
+            min-height: 3.1rem;
+            padding: 0.75rem 2.75rem 0.75rem 1rem;
+            border-radius: 0.8rem;
+            cursor: pointer;
+        }
+
+        select option {
+            color: #10243b;
+            background: #f5f9ff;
+        }
+
+        select:focus,
+        textarea:focus {
+            border-color: var(--primary);
+            background-color: rgba(7, 25, 47, 0.92);
+            box-shadow: 0 0 0 3px rgba(105, 183, 255, 0.16);
+        }
+
+        .status-message {
+            display: flex;
+            align-items: center;
+            gap: 0.65rem;
+            min-height: 2.75rem;
+            margin: 0 0 1.25rem;
+            padding: 0.7rem 0.95rem;
+            border: 1px solid rgba(105, 183, 255, 0.16);
+            border-radius: 0.8rem;
+            color: #c8e6ff;
+            background: rgba(37, 122, 198, 0.12);
+            font-size: 0.9rem;
+        }
+
+        .status-message::before {
+            width: 0.55rem;
+            height: 0.55rem;
+            flex: 0 0 auto;
+            border-radius: 50%;
+            background: var(--primary);
+            box-shadow: 0 0 0 4px rgba(105, 183, 255, 0.13);
+            content: "";
+        }
+
+        .transcript-container {
+            margin: 0 0 1.5rem;
+        }
+
+        textarea {
+            display: block;
+            min-height: 17rem;
+            padding: 1.1rem 1.15rem;
+            resize: vertical;
+            border-radius: 1rem;
+            color: #eaf5ff;
+            background: rgba(3, 13, 26, 0.58);
+            cursor: text;
+            line-height: 1.7;
+        }
+
+        textarea::placeholder {
+            color: #7992aa;
+        }
+
+        .button-group {
+            display: flex;
+            align-items: stretch;
+            justify-content: flex-end;
+            gap: 0.75rem;
+            flex-wrap: wrap;
+        }
+
+        .button-group form {
+            display: flex;
+        }
+
+        .btn {
+            display: inline-flex;
+            min-height: 3rem;
+            align-items: center;
+            justify-content: center;
+            gap: 0.55rem;
+            padding: 0.75rem 1.1rem;
+            border: 1px solid transparent;
+            border-radius: 0.75rem;
+            color: var(--text);
+            font: inherit;
+            font-size: 0.9rem;
+            font-weight: 700;
+            cursor: pointer;
+            transition: transform 160ms ease, box-shadow 160ms ease, background-color 160ms ease, border-color 160ms ease;
+        }
+
+        .btn .material-icons {
+            font-size: 1.2rem;
+        }
+
+        .btn:hover:not(:disabled) {
+            transform: translateY(-2px);
+        }
+
+        .btn:focus-visible {
+            outline: 3px solid rgba(255, 255, 255, 0.86);
+            outline-offset: 2px;
+        }
+
+        .btn.primary {
+            background: linear-gradient(135deg, #6bc1ff, var(--primary-strong));
+            box-shadow: 0 10px 24px rgba(46, 141, 230, 0.25);
+        }
+
+        .btn.primary:hover:not(:disabled) {
+            box-shadow: 0 14px 28px rgba(46, 141, 230, 0.38);
+        }
+
+        .btn.secondary {
+            border-color: rgba(255, 255, 255, 0.14);
+            color: #d1deeb;
+            background: rgba(255, 255, 255, 0.08);
+        }
+
+        .btn.secondary:hover:not(:disabled) {
+            border-color: rgba(255, 125, 141, 0.5);
+            color: #fff;
+            background: rgba(255, 125, 141, 0.13);
+        }
+
+        .btn.download {
+            color: #061526;
+            background: #b9e4ff;
+            box-shadow: 0 10px 24px rgba(105, 183, 255, 0.16);
+        }
+
+        .btn.download:hover:not(:disabled) {
+            background: #d2efff;
+            box-shadow: 0 14px 28px rgba(105, 183, 255, 0.3);
+        }
+
+        .btn:disabled {
+            opacity: 0.42;
+            cursor: not-allowed;
+            transform: none;
+            box-shadow: none;
+        }
+
+        footer {
+            padding-top: 1.5rem;
+            color: #7891a9;
+            font-size: 0.82rem;
+            text-align: center;
+        }
+
+        footer p {
+            margin: 0;
+        }
+
+        @media (max-width: 620px) {
+            .app-container {
+                width: min(100% - 1.25rem, 860px);
+                padding-top: 2.5rem;
+            }
+
+            .glass-card {
+                border-radius: 1.15rem;
+            }
+
+            .button-group,
+            .button-group form,
+            .btn {
+                width: 100%;
+            }
+
+            .button-group {
+                flex-direction: column;
+            }
+
+            textarea {
+                min-height: 13rem;
+            }
+        }
+
+        @media (prefers-reduced-motion: reduce) {
+            *,
+            *::before,
+            *::after {
+                scroll-behavior: auto !important;
+                transition-duration: 0.01ms !important;
+            }
+        }
+    </style>
 </head>
 <body>
     <!-- Add video background -->
@@ -19,9 +360,13 @@
     <!-- Add animated gradient overlay -->
     <div class="gradient-overlay"></div>
 
-    <h1>Speech to Text</h1>
-    <!-- Remove video background for a cleaner look -->
     <div class="app-container">
+        <header class="hero">
+            <div class="brand"><span class="material-icons">graphic_eq</span> S2T workspace</div>
+            <h1>Speech to Text</h1>
+            <p>Turn your voice into clear, downloadable text in the language you speak.</p>
+        </header>
+
         <div class="glass-card">
             
             <div class="language-selector">
@@ -46,7 +391,7 @@
             <div id="status" class="status-message">Click "Start" to begin recording...</div>
             
             <div class="transcript-container">
-                <textarea id="transcript" rows="10" placeholder="Your speech will appear here..." readonly></textarea>
+                <textarea id="transcript" rows="10" placeholder="Your speech will appear here..." aria-label="Transcript" readonly></textarea>
             </div>
             
             <div class="button-group">
